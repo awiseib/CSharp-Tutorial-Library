@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace C__Tutorial_Library
 {
-    internal class placeOrderTest : DefaultEWrapper
+    internal class PlaceOrderTest : DefaultEWrapper
     {
 
         //! [ewrapperimpl]
@@ -16,37 +16,41 @@ namespace C__Tutorial_Library
         public readonly EReaderSignal Signal;
 
 
-        public static void placeOrderMain()
+        public static void PlaceOrderMain()
         {
-            var testImpl = new placeOrderTest();
+            var testImpl = new PlaceOrderTest();
 
             EClientSocket clientSocket = testImpl.ClientSocket;
             EReaderSignal readerSignal = testImpl.Signal;
 
-            clientSocket.eConnect("127.0.0.1", 7497, 2000);
+            clientSocket.eConnect("127.0.0.1", 7496, 2000);
 
             var reader = new EReader(clientSocket, readerSignal);
             reader.Start();
+            new Thread(() => { while (clientSocket.IsConnected()) { readerSignal.waitForSignal(); reader.processMsgs(); } }) { IsBackground = true }.Start();
 
-            //while (testImpl.NextOrderId <= 0) { }
 
-            Contract contract = new Contract();
-            contract.Symbol = "AAPL";
-            contract.SecType = "STK";
-            contract.Exchange = "SMART";
-            contract.Currency = "USD";
+            Contract contract = new()
+            {
+                Symbol = "AAPL",
+                SecType = "STK",
+                Exchange = "SMART",
+                Currency = "USD"
+            };
 
-            Order order = new Order();
-            order.Action = "BUY";
-            order.OrderType = "LMT";
-            order.LmtPrice = 147;
-            order.TotalQuantity = 10;
-            order.Tif = "GTC";
+            Order order = new()
+            {
+                Action = "BUY",
+                OrderType = "MKT",
+                TotalQuantity = 5,
+                Tif = "GTC"
+            };
 
+            Thread.Sleep(5);
             Console.WriteLine("Placed an order for " + contract.Symbol);
-            clientSocket.placeOrder(testImpl.NextOrderId, contract, order);
+            clientSocket.placeOrder(testImpl.NextOrderId , contract, order);
 
-            Thread.Sleep(5000);
+            Thread.Sleep(1000);
             Console.WriteLine("Disconnecting...");
             clientSocket.eDisconnect();
         }
@@ -72,7 +76,7 @@ namespace C__Tutorial_Library
         }
 
         //! [socket_init]
-        public placeOrderTest()
+        public PlaceOrderTest()
         {
             Signal = new EReaderMonitorSignal();
             clientSocket = new EClientSocket(this, Signal);

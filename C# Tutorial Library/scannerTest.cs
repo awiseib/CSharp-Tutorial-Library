@@ -1,13 +1,14 @@
 ﻿using IBApi;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace C__Tutorial_Library
 {
-    internal class scannerTest : DefaultEWrapper
+    internal class ScannerTest : DefaultEWrapper
     {
         //! [ewrapperimpl]
         private int nextOrderId;
@@ -15,9 +16,9 @@ namespace C__Tutorial_Library
         public readonly EReaderSignal Signal;
 
 
-        public static void scannerMain()
+        public static void ScannerMain()
         {
-            var testImpl = new scannerTest();
+            var testImpl = new ScannerTest();
 
             EClientSocket clientSocket = testImpl.ClientSocket;
             EReaderSignal readerSignal = testImpl.Signal;
@@ -29,19 +30,22 @@ namespace C__Tutorial_Library
             //Once the messages are in the queue, an additional thread can be created to fetch them
             new Thread(() => { while (clientSocket.IsConnected()) { readerSignal.waitForSignal(); reader.processMsgs(); } }) { IsBackground = true }.Start();
 
-            while (testImpl.NextOrderId <= 0) { }
+            Thread.Sleep(5);
 
-            ScannerSubscription sub = new ScannerSubscription();
-            sub.Instrument = "STK";
-            sub.LocationCode = "STK.US.MAJOR";
-            sub.ScanCode = "TOP_PERC_GAIN";
+            ScannerSubscription sub = new()
+            {
+                Instrument = "STK",
+                LocationCode = "STK.US.MAJOR",
+                ScanCode = "TOP_PERC_GAIN",
+            };
 
-            List<IBApi.TagValue> scanOptions = new List<IBApi.TagValue>();
-            List<IBApi.TagValue> filterOptions = new List<IBApi.TagValue>();
+            List<IBApi.TagValue> scanOptions = new();
 
-            filterOptions.Add(new TagValue("volumeAbove", "10000"));
-            filterOptions.Add(new TagValue("marketCapBelow1e6", "1000"));
-            filterOptions.Add(new TagValue("priceAbove", "1"));
+            List<IBApi.TagValue> filterOptions = new() {
+                new TagValue("volumeAbove", "10000"),
+                new TagValue("marketCapBelow1e6", "1000"),
+                new TagValue("priceAbove", "1")
+            };
 
             clientSocket.reqScannerSubscription(1234, sub, scanOptions, filterOptions);
 
@@ -61,7 +65,7 @@ namespace C__Tutorial_Library
         }
 
         //! [socket_init]
-        public scannerTest()
+        public ScannerTest()
         {
             Signal = new EReaderMonitorSignal();
             clientSocket = new EClientSocket(this, Signal);

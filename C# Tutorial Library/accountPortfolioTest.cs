@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace C__Tutorial_Library
 {
-    internal class accountPortfolioTest : DefaultEWrapper
+    internal class AccountPortfolioTest : DefaultEWrapper
     {
         //! [ewrapperimpl]
         private int nextOrderId;
@@ -15,21 +15,20 @@ namespace C__Tutorial_Library
         public readonly EReaderSignal Signal;
 
 
-        public static void accountMain()
+        public static void AccountMain()
         {
-            var testImpl = new accountPortfolioTest();
+            var testImpl = new AccountPortfolioTest();
 
             EClientSocket clientSocket = testImpl.ClientSocket;
             EReaderSignal readerSignal = testImpl.Signal;
 
-            clientSocket.eConnect("127.0.0.1", 7497, 1000);
+            clientSocket.eConnect("127.0.0.1", 7496, 2000);
 
             var reader = new EReader(clientSocket, readerSignal);
             reader.Start();
-            //Once the messages are in the queue, an additional thread can be created to fetch them
             new Thread(() => { while (clientSocket.IsConnected()) { readerSignal.waitForSignal(); reader.processMsgs(); } }) { IsBackground = true }.Start();
 
-            while (testImpl.NextOrderId <= 0) { }
+            Thread.Sleep(5);
 
             Console.WriteLine("Requesting account updates.");
             clientSocket.reqAccountUpdates(true, "");
@@ -57,7 +56,7 @@ namespace C__Tutorial_Library
         }
 
         //! [socket_init]
-        public accountPortfolioTest()
+        public AccountPortfolioTest()
         {
             Signal = new EReaderMonitorSignal();
             clientSocket = new EClientSocket(this, Signal);

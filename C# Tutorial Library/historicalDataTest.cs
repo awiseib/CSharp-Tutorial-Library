@@ -1,6 +1,7 @@
 ﻿using System;
 using IBApi;
-using System;using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -30,13 +31,15 @@ namespace C__Tutorial_Library
             //Once the messages are in the queue, an additional thread can be created to fetch them
             new Thread(() => { while (clientSocket.IsConnected()) { readerSignal.waitForSignal(); reader.processMsgs(); } }) { IsBackground = true }.Start();
 
-            while (testImpl.NextOrderId <= 0) { }
+            Thread.Sleep(5);
 
-            Contract contract = new Contract();
-            contract.Symbol = "AAPL";
-            contract.SecType = "STK";
-            contract.Exchange = "SMART";
-            contract.Currency = "USD";
+            Contract contract = new()
+            {
+                Symbol = "AAPL",
+                SecType = "STK",
+                Exchange = "SMART",
+                Currency = "USD"
+            };
 
             Console.WriteLine("Requesting historical data for " + contract.Symbol);
             clientSocket.reqHistoricalData(testImpl.NextOrderId, contract, "", "1 D", "1 hour", "Trades", 1, 1, false, null);

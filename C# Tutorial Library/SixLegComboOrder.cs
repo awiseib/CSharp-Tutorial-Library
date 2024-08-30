@@ -4,21 +4,31 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Net;
+using System.Security.Principal;
+
 
 namespace C__Tutorial_Library
 {
-    internal class BracketOrderTest : DefaultEWrapper
+    internal class Legs
     {
+        public string Symbol { get; set; }
+        public int Id { get; set; }
+        public int Ratio { get; set; }
+        public string IsBuyer { get; set; }
+    }
 
+    internal class SixLegComboOrder : DefaultEWrapper
+    {
         //! [ewrapperimpl]
         private int nextOrderId;
         EClientSocket clientSocket;
         public readonly EReaderSignal Signal;
 
-
-        public static void BracketOrderMain()
+        public static void SixLegMain()
         {
-            var testImpl = new BracketOrderTest();
+
+            var testImpl = new SixLegComboOrder();
 
             EClientSocket clientSocket = testImpl.ClientSocket;
             EReaderSignal readerSignal = testImpl.Signal;
@@ -29,53 +39,39 @@ namespace C__Tutorial_Library
             reader.Start();
             new Thread(() => { while (clientSocket.IsConnected()) { readerSignal.waitForSignal(); reader.processMsgs(); } }) { IsBackground = true }.Start();
 
-            Thread.Sleep(50);
-            Contract contract = new()
+            Order order = new()
             {
-                Symbol = "AAPL",
-                SecType = "STK",
-                Exchange = "SMART",
-                Currency = "USD",
-            };
-
-            Order parent = new()
-            {
-                OrderId = testImpl.NextOrderId,
-                OrderType = "MKT",
                 Action = "BUY",
+                OrderType = "MKT",
                 TotalQuantity = 10,
-                Transmit = false
+                Tif = "DAY",
+                Transmit = true,
+                OutsideRth = false,
+                SmartComboRoutingParams = new List<TagValue>() { new("NonGuaranteed", "0") }
+
             };
 
-            Order profit_taker = new()
+            var contract = new Contract();
+            contract.Symbol = "SPY";
+            contract.SecType = "BAG";
+            contract.Currency = "USD";
+            contract.Exchange = "SMART";
+            contract.ComboLegs = new() 
             {
-                OrderId = parent.OrderId + 1,
-                ParentId = parent.OrderId,
-                Action = "SELL",
-                OrderType = "LMT",
-                LmtPrice = 230,
-                TotalQuantity = 10,
-                Transmit = false
-            };
+                new ComboLeg() { ConId = 715192497, Exchange = "SMART", Ratio = 1, Action = "BUY" },
+                new ComboLeg() { ConId = 715192524, Exchange = "SMART", Ratio = 1, Action = "BUY" },
+                new ComboLeg() { ConId = 715193307, Exchange = "SMART", Ratio = 1, Action = "BUY" },
+                new ComboLeg() { ConId = 715193325, Exchange = "SMART", Ratio = 1, Action = "BUY" },
+                
+                new ComboLeg() { ConId = 723281337, Exchange = "SMART", Ratio = 1, Action = "BUY" },
+                new ComboLeg() { ConId = 723282650, Exchange = "SMART", Ratio = 20, Action = "SELL" },
+        };
 
-            Order stop_loss = new()
-            {
-                OrderId = parent.OrderId + 2,
-                ParentId = parent.OrderId,
-                OrderType = "STP",
-                AuxPrice = 225,
-                Action = "SELL",
-                TotalQuantity = 10,
-                Transmit = true
-            };
-
-            Thread.Sleep(50);
+            Thread.Sleep(200);
             Console.WriteLine("Placed an order for " + contract.Symbol);
-            clientSocket.placeOrder(parent.OrderId, contract, parent);
-            clientSocket.placeOrder(profit_taker.OrderId, contract, profit_taker);
-            clientSocket.placeOrder(stop_loss.OrderId, contract, stop_loss);
+            clientSocket.placeOrder(testImpl.NextOrderId, contract, order);
 
-            Thread.Sleep(5000);
+            Thread.Sleep(1000);
             Console.WriteLine("Disconnecting...");
             clientSocket.eDisconnect();
         }
@@ -101,7 +97,7 @@ namespace C__Tutorial_Library
         }
 
         //! [socket_init]
-        public BracketOrderTest()
+        public SixLegComboOrder()
         {
             Signal = new EReaderMonitorSignal();
             clientSocket = new EClientSocket(this, Signal);

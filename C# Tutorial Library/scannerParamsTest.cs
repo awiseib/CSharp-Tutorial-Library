@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace C__Tutorial_Library
 {
-    internal class scannerParamsTest : DefaultEWrapper
+    internal class ScannerParamsTest : DefaultEWrapper
     {
         //! [ewrapperimpl]
         private int nextOrderId;
@@ -16,9 +16,9 @@ namespace C__Tutorial_Library
         public readonly EReaderSignal Signal;
 
 
-        public static void scannerParamsTestMain()
+        public static void ScannerParamsTestMain()
         {
-            var testImpl = new scannerParamsTest();
+            var testImpl = new ScannerParamsTest();
 
             EClientSocket clientSocket = testImpl.ClientSocket;
             EReaderSignal readerSignal = testImpl.Signal;
@@ -29,8 +29,6 @@ namespace C__Tutorial_Library
             reader.Start();
             //Once the messages are in the queue, an additional thread can be created to fetch them
             new Thread(() => { while (clientSocket.IsConnected()) { readerSignal.waitForSignal(); reader.processMsgs(); } }) { IsBackground = true }.Start();
-
-            while (testImpl.NextOrderId <= 0) { }
 
             clientSocket.reqScannerParameters();
 
@@ -53,7 +51,7 @@ namespace C__Tutorial_Library
         }
 
         //! [socket_init]
-        public scannerParamsTest()
+        public ScannerParamsTest()
         {
             Signal = new EReaderMonitorSignal();
             clientSocket = new EClientSocket(this, Signal);

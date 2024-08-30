@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace C__Tutorial_Library
 {
-    internal class tickByTickTest : DefaultEWrapper
+    internal class TickByTickTest : DefaultEWrapper
     {
 
         //! [ewrapperimpl]
@@ -16,9 +16,9 @@ namespace C__Tutorial_Library
         public readonly EReaderSignal Signal;
 
 
-        public static void tickByTickTestMain()
+        public static void TickByTickTestMain()
         {
-            var testImpl = new tickByTickTest();
+            var testImpl = new TickByTickTest();
 
             EClientSocket clientSocket = testImpl.ClientSocket;
             EReaderSignal readerSignal = testImpl.Signal;
@@ -30,16 +30,19 @@ namespace C__Tutorial_Library
             //Once the messages are in the queue, an additional thread can be created to fetch them
             new Thread(() => { while (clientSocket.IsConnected()) { readerSignal.waitForSignal(); reader.processMsgs(); } }) { IsBackground = true }.Start();
 
-            while (testImpl.NextOrderId <= 0) { }
 
-            Contract contract = new Contract();
-            contract.Symbol = "AAL";
-            contract.SecType = "STK";
-            contract.Exchange = "SMART";
-            contract.Currency = "USD";
-
+            Contract contract = new()
+            {
+                ConId = 12087792,
+                Symbol = "EUR",
+                Exchange = "IDEALPRO",
+                PrimaryExch = null,
+                Currency = "USD",
+                SecType = "CASH"
+            };
+            Thread.Sleep(5);
             Console.WriteLine("Requesting market data for " + contract.Symbol);
-            clientSocket.reqTickByTickData(testImpl.NextOrderId, contract, "Trades", 100, false);
+            clientSocket.reqTickByTickData(testImpl.NextOrderId, contract, "BidAsk", 1, true);
 
             // We can stream data forever, but we'll kill the connection after 1000 milliseconds.
             Thread.Sleep(10000);
@@ -49,12 +52,13 @@ namespace C__Tutorial_Library
 
         public override void tickByTickAllLast(int reqId, int tickType, long time, double price, decimal size, TickAttribLast tickAttribLast, string exchange, string specialConditions)
         {
-            Console.WriteLine("tickByTickAllLast", reqId, tickType, time, price, size, tickAttribLast, exchange, specialConditions);
+            Console.WriteLine("tickByTickAllLast", reqId, TickType.getField(tickType), time, price, size, tickAttribLast, exchange, specialConditions);
         }
 
         public override void tickByTickBidAsk(int reqId, long time, double bidPrice, double askPrice, decimal bidSize, decimal askSize, TickAttribBidAsk tickAttribBidAsk)
         {
-            Console.WriteLine("tickByTickBidAsk", reqId, time, bidPrice, askPrice, bidSize, askSize, tickAttribBidAsk);
+            Console.WriteLine($"tickByTickBidAsk. {reqId}, {time}, {bidPrice}, {askPrice}, {bidSize}, {askSize}, {tickAttribBidAsk}");
+            //Console.WriteLine($"Ask Price: {askPrice}");
         }
 
         public override void tickByTickMidPoint(int reqId, long time, double midPoint)
@@ -65,7 +69,7 @@ namespace C__Tutorial_Library
 
 
         //! [socket_init]
-        public tickByTickTest()
+        public TickByTickTest()
         {
             Signal = new EReaderMonitorSignal();
             clientSocket = new EClientSocket(this, Signal);

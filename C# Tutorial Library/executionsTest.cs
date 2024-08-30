@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace C__Tutorial_Library
 {
-    internal class executionsTest : DefaultEWrapper
+    internal class ExecutionsTest : DefaultEWrapper
     {
         //! [ewrapperimpl]
         private int nextOrderId;
@@ -15,9 +15,9 @@ namespace C__Tutorial_Library
         public readonly EReaderSignal Signal;
 
 
-        public static void executionsMain()
+        public static void ExecutionsMain()
         {
-            var testImpl = new executionsTest();
+            var testImpl = new ExecutionsTest();
 
             EClientSocket clientSocket = testImpl.ClientSocket;
             EReaderSignal readerSignal = testImpl.Signal;
@@ -29,9 +29,10 @@ namespace C__Tutorial_Library
             //Once the messages are in the queue, an additional thread can be created to fetch them
             new Thread(() => { while (clientSocket.IsConnected()) { readerSignal.waitForSignal(); reader.processMsgs(); } }) { IsBackground = true }.Start();
 
-            while (testImpl.NextOrderId <= 0) { }
+            Thread.Sleep(5);
 
-            ExecutionFilter filter = new ExecutionFilter();
+            ExecutionFilter filter = new();
+
             clientSocket.reqExecutions(testImpl.NextOrderId, filter);
 
             Thread.Sleep(1000);
@@ -50,7 +51,7 @@ namespace C__Tutorial_Library
         }
 
         //! [socket_init]
-        public executionsTest()
+        public ExecutionsTest()
         {
             Signal = new EReaderMonitorSignal();
             clientSocket = new EClientSocket(this, Signal);

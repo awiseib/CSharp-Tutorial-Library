@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace C__Tutorial_Library
 {
-    internal class positionsTest : DefaultEWrapper
+    internal class PositionsTest : DefaultEWrapper
     {
         //! [ewrapperimpl]
         private int nextOrderId;
@@ -15,9 +15,9 @@ namespace C__Tutorial_Library
         public readonly EReaderSignal Signal;
 
 
-        public static void positionMain()
+        public static void PositionMain()
         {
-            var testImpl = new positionsTest();
+            var testImpl = new PositionsTest();
 
             EClientSocket clientSocket = testImpl.ClientSocket;
             EReaderSignal readerSignal = testImpl.Signal;
@@ -51,7 +51,7 @@ namespace C__Tutorial_Library
         }
 
         //! [socket_init]
-        public positionsTest()
+        public PositionsTest()
         {
             Signal = new EReaderMonitorSignal();
             clientSocket = new EClientSocket(this, Signal);

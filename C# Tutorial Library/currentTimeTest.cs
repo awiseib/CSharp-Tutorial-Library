@@ -2,11 +2,10 @@
 using IBApi;
 using System.Threading;
 using System.Collections.Generic;
-using C__Tutorial_Library;
 
 namespace C__Tutorial_Library
 {
-    internal class currentTimeTest : DefaultEWrapper
+    internal class CurrentTimeTest : DefaultEWrapper
     {
             //! [ewrapperimpl]
             private int nextOrderId;
@@ -14,9 +13,9 @@ namespace C__Tutorial_Library
             public readonly EReaderSignal Signal;
 
 
-            public static void timeMain()
+            public static void TimeMain()
         {
-            var testImpl = new currentTimeTest();
+            var testImpl = new CurrentTimeTest();
 
             EClientSocket clientSocket = testImpl.ClientSocket;
             EReaderSignal readerSignal = testImpl.Signal;
@@ -28,7 +27,7 @@ namespace C__Tutorial_Library
             //Once the messages are in the queue, an additional thread can be created to fetch them
             new Thread(() => { while (clientSocket.IsConnected()) { readerSignal.waitForSignal(); reader.processMsgs(); } }) { IsBackground = true }.Start();
 
-            while (testImpl.NextOrderId <= 0) { }
+            Thread.Sleep(5);
 
             clientSocket.reqCurrentTime();
 
@@ -43,7 +42,7 @@ namespace C__Tutorial_Library
         }
 
         //! [socket_init]
-        public currentTimeTest()
+        public CurrentTimeTest()
         {
             Signal = new EReaderMonitorSignal();
             clientSocket = new EClientSocket(this, Signal);

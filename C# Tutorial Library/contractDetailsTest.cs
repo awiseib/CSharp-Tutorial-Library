@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace C__Tutorial_Library
 {
-    internal class contractDetailsTest : DefaultEWrapper
+    internal class ContractDetailsTest : DefaultEWrapper
     {
         //! [ewrapperimpl]
         private int nextOrderId;
@@ -15,9 +15,9 @@ namespace C__Tutorial_Library
         EClientSocket clientSocket;
         public readonly EReaderSignal Signal;
         //! [socket_declare]
-        public static void contractMain()
+        public static void ContractMain()
         {
-            var testImpl = new contractDetailsTest();
+            var testImpl = new ContractDetailsTest();
 
             EClientSocket clientSocket = testImpl.ClientSocket;
             EReaderSignal readerSignal = testImpl.Signal;
@@ -29,16 +29,15 @@ namespace C__Tutorial_Library
             //Once the messages are in the queue, an additional thread can be created to fetch them
             new Thread(() => { while (clientSocket.IsConnected()) { readerSignal.waitForSignal(); reader.processMsgs(); } }) { IsBackground = true }.Start();
 
-            while (testImpl.NextOrderId <= 0) { }
+            Thread.Sleep(5);
 
-            Contract contract = new Contract();
-            contract.Symbol = "AAPL";
-            contract.SecType = "OPT";
-            contract.Exchange = "SMART";
-            contract.Currency = "USD";
-            contract.Right = "C";
-            contract.LastTradeDateOrContractMonth = "202211";
-            contract.Strike = 125;
+            Contract contract = new()
+            {
+                Symbol = "AAPL",
+                SecType = "STK",
+                Exchange = "SMART",
+                Currency = "USD"
+            };
 
 
             Console.WriteLine("Requesting Contract Details...");
@@ -51,7 +50,7 @@ namespace C__Tutorial_Library
 
 
         //! [socket_init]
-        public contractDetailsTest()
+        public ContractDetailsTest()
         {
             Signal = new EReaderMonitorSignal();
             clientSocket = new EClientSocket(this, Signal);

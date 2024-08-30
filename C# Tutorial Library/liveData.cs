@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace C__Tutorial_Library
 {
-    internal class liveData : DefaultEWrapper
+    internal class LiveData : DefaultEWrapper
     {
 
         //! [ewrapperimpl]
@@ -16,9 +16,9 @@ namespace C__Tutorial_Library
         public readonly EReaderSignal Signal;
 
 
-        public static void liveDataMain()
+        public static void LiveDataMain()
         {
-            var testImpl = new liveData();
+            var testImpl = new LiveData();
 
             EClientSocket clientSocket = testImpl.ClientSocket;
             EReaderSignal readerSignal = testImpl.Signal;
@@ -30,13 +30,15 @@ namespace C__Tutorial_Library
             //Once the messages are in the queue, an additional thread can be created to fetch them
             new Thread(() => { while (clientSocket.IsConnected()) { readerSignal.waitForSignal(); reader.processMsgs(); } }) { IsBackground = true }.Start();
 
-            while (testImpl.NextOrderId <= 0) { }
+            Thread.Sleep(100);
 
-            Contract contract = new Contract();
-            contract.Symbol = "AAPL";
-            contract.SecType = "STK";
-            contract.Exchange = "SMART";
-            contract.Currency = "USD";
+            Contract contract = new()
+            {
+                Symbol = "AAPL",
+                SecType = "STK",
+                Exchange = "SMART",
+                Currency = "USD"
+            };
 
             Console.WriteLine("Requesting market data for " + contract.Symbol);
             clientSocket.reqMktData(testImpl.NextOrderId, contract, "", false, false, null);
@@ -51,7 +53,7 @@ namespace C__Tutorial_Library
         //! [tickprice]
         public override void tickPrice(int tickerId, int field, double price, TickAttrib attribs)
         {
-            Console.WriteLine("Tick Price. Ticker Id:" + tickerId + ", Field: " + field + ", Price: " + Util.DoubleMaxString(price) + ", CanAutoExecute: " + attribs.CanAutoExecute +
+            Console.WriteLine("Tick Price. Ticker Id:" + tickerId + ", Field: " + TickType.getField(field) + ", Price: " + Util.DoubleMaxString(price) + ", CanAutoExecute: " + attribs.CanAutoExecute +
                 ", PastLimit: " + attribs.PastLimit + ", PreOpen: " + attribs.PreOpen);
         }
         //! [tickprice]
@@ -59,7 +61,7 @@ namespace C__Tutorial_Library
         //! [ticksize]
         public override void tickSize(int tickerId, int field, decimal size)
         {
-            Console.WriteLine("Tick Size. Ticker Id:" + tickerId + ", Field: " + field + ", Size: " + Util.DecimalMaxString(size));
+            Console.WriteLine("Tick Size. Ticker Id:" + tickerId + ", Field: " + TickType.getField(field) + ", Size: " + Util.DecimalMaxString(size));
         }
         //! [ticksize]
 
@@ -73,7 +75,7 @@ namespace C__Tutorial_Library
         //! [tickgeneric]
         public override void tickGeneric(int tickerId, int field, double value)
         {
-            Console.WriteLine("Tick Generic. Ticker Id:" + tickerId + ", Field: " + field + ", Value: " + Util.DoubleMaxString(value));
+            Console.WriteLine("Tick Generic. Ticker Id:" + tickerId + ", Field: " + TickType.getField(field) + ", Value: " + Util.DoubleMaxString(value));
         }
         //! [tickgeneric]
 
@@ -93,7 +95,7 @@ namespace C__Tutorial_Library
 
 
         //! [socket_init]
-        public liveData()
+        public LiveData()
         {
             Signal = new EReaderMonitorSignal();
             clientSocket = new EClientSocket(this, Signal);

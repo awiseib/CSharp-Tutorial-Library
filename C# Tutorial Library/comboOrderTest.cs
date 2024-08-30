@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace C__Tutorial_Library
 {
-    internal class comboOrderTest : DefaultEWrapper
+    internal class ComboOrderTest : DefaultEWrapper
     {
 
         //! [ewrapperimpl]
@@ -16,55 +16,60 @@ namespace C__Tutorial_Library
         public readonly EReaderSignal Signal;
 
 
-        public static void comboOrderMain()
+        public static void ComboOrderMain()
         {
-            var testImpl = new comboOrderTest();
+            var testImpl = new ComboOrderTest();
 
             EClientSocket clientSocket = testImpl.ClientSocket;
             EReaderSignal readerSignal = testImpl.Signal;
 
-            clientSocket.eConnect("127.0.0.1", 7497, 2000);
+            clientSocket.eConnect("127.0.0.1", 7496, 2000);
 
             var reader = new EReader(clientSocket, readerSignal);
             reader.Start();
+            new Thread(() => { while (clientSocket.IsConnected()) { readerSignal.waitForSignal(); reader.processMsgs(); } }) { IsBackground = true }.Start();
 
-            //while (testImpl.NextOrderId <= 0) { }
+            Thread.Sleep(50);
 
-            Contract contract = new Contract();
-            contract.Symbol = "AAPL,TSLA";
-            contract.SecType = "BAG";
-            contract.Exchange = "SMART";
-            contract.Currency = "USD";
+            Contract contract = new()
+            {
+                Symbol = "AAPL,TSLA",
+                SecType = "BAG",
+                Exchange = "SMART",
+                Currency = "USD"
+            };
 
 
-            ComboLeg leg1 = new ComboLeg();
-            leg1.ConId = 76792991;
-            leg1.Ratio = 1;
-            leg1.Action = "BUY";
-            leg1.Exchange = "SMART";
+            ComboLeg leg1 = new()
+            {
+                ConId = 76792991,
+                Ratio = 1,
+                Action = "BUY",
+                Exchange = "SMART"
+            };
 
-            ComboLeg leg2 = new ComboLeg();
-            leg2.ConId = 265598;
-            leg2.Ratio = 1;
-            leg2.Action = "SELL";
-            leg2.Exchange = "SMART";
+            ComboLeg leg2 = new()
+            {
+                ConId = 265598,
+                Ratio = 1,
+                Action = "SELL",
+                Exchange = "SMART"
+            };
 
-            contract.ComboLegs = new List<ComboLeg>(); ;
-            contract.ComboLegs.Add(leg1);
-            contract.ComboLegs.Add(leg2);
+            contract.ComboLegs = new() { leg1, leg2 };
 
-            Order order = new Order();
-            order.Action = "BUY";
-            order.OrderType = "LMT";
-            order.LmtPrice = 8.3;
-            order.TotalQuantity = 10;
-            order.Tif = "GTC";
-
-            order.SmartComboRoutingParams = new List<IBApi.TagValue>();
-            order.SmartComboRoutingParams.Add(new TagValue("NonGuaranteed", "1"));
+            Order order = new()
+            {
+                Action = "BUY",
+                OrderType = "LMT",
+                LmtPrice = 8.3,
+                TotalQuantity = 10,
+                Tif = "GTC",
+                SmartComboRoutingParams = new() { new TagValue("NonGuaranteed", "1") }
+                };
 
             Console.WriteLine("Placed an order for " + contract.Symbol);
-            clientSocket.placeOrder(654654564, contract, order);
+            clientSocket.placeOrder(testImpl.NextOrderId, contract, order);
 
             Thread.Sleep(5000);
             Console.WriteLine("Disconnecting...");
@@ -92,7 +97,7 @@ namespace C__Tutorial_Library
         }
 
         //! [socket_init]
-        public comboOrderTest()
+        public ComboOrderTest()
         {
             Signal = new EReaderMonitorSignal();
             clientSocket = new EClientSocket(this, Signal);
