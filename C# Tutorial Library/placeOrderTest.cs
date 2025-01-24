@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using IBApi;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,7 +27,7 @@ namespace C__Tutorial_Library
 
             var reader = new EReader(clientSocket, readerSignal);
             reader.Start();
-            new Thread(() => { while (clientSocket.IsConnected()) { readerSignal.waitForSignal(); reader.processMsgs(); } }) { IsBackground = true }.Start();
+            new Thread(() => { while (clientSocket.IsConnected()) { readerSignal.waitForSignal(); reader.processMsgs(); } }) { IsBackground = false }.Start();
 
 
             Contract contract = new()
@@ -48,11 +48,9 @@ namespace C__Tutorial_Library
 
             Thread.Sleep(5);
             Console.WriteLine("Placed an order for " + contract.Symbol);
+            clientSocket.reqIds(-1);
+            Thread.Sleep(1);
             clientSocket.placeOrder(testImpl.NextOrderId , contract, order);
-
-            Thread.Sleep(1000);
-            Console.WriteLine("Disconnecting...");
-            clientSocket.eDisconnect();
         }
 
         public override void openOrder(int orderId, Contract contract, Order order, OrderState orderState)
@@ -60,7 +58,7 @@ namespace C__Tutorial_Library
             Console.WriteLine("openOrder. " + ", " + orderId + ", " + contract + ", " + order + ", " + orderState);
         }
 
-        public override void orderStatus(int orderId, string status, decimal filled, decimal remaining, double avgFillPrice, int permId, int parentId, double lastFillPrice, int clientId, string whyHeld, double mktCapPrice)
+        public override void orderStatus(int orderId, string status, decimal filled, decimal remaining, double avgFillPrice, long permId, int parentId, double lastFillPrice, int clientId, string whyHeld, double mktCapPrice)
         {
             Console.WriteLine("orderStatus. " + orderId + ", " + status + ", " + filled + ", " + remaining + ", " + avgFillPrice + ", " + permId + ", " + parentId + ", " + lastFillPrice + ", " + clientId + ", " + whyHeld + ", " + mktCapPrice);
         }
