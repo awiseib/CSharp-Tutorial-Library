@@ -10,33 +10,35 @@ namespace C__Tutorial_Library
     {
         public static void Main()
         {
-            //CurrentTimeTest.TimeMain();
+            CurrentTimeTest.TimeMain();
 
-            //ContractDetailsTest.ContractMain();
+            ContractDetailsTest.ContractMain();
 
-            //LiveData.LiveDataMain();
+            LiveData.LiveDataMain();
 
-            //historicalDataTest.historicalMain();
+            historicalDataTest.historicalMain();
+
+            historicalUpdateTest.historicalUpdateMain();
 
             PlaceOrderTest.PlaceOrderMain();
 
-            //ComboOrderTest.ComboOrderMain();
+            ComboOrderTest.ComboOrderMain();
 
-            //BracketOrderTest.BracketOrderMain();
+            BracketOrderTest.BracketOrderMain();
 
-            //AccountPortfolioTest.AccountMain();
+            AccountPortfolioTest.AccountMain();
 
-            //ExecutionsTest.ExecutionsMain();
+            ExecutionsTest.ExecutionsMain();
 
-            //ScannerParamsTest.ScannerParamsTestMain();
+            ScannerParamsTest.ScannerParamsTestMain();
 
-            //ScannerTest.ScannerMain();
+            ScannerTest.ScannerMain();
 
-            //TickByTickTest.TickByTickTestMain();
+            TickByTickTest.TickByTickTestMain();
 
-            //PositionsTest.PositionMain();
+            PositionsTest.PositionMain();
 
-            //SixLegComboOrder.SixLegMain();
+            SixLegComboOrder.SixLegMain();
 
         }
     }
